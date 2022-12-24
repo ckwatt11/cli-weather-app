@@ -1,4 +1,5 @@
 import json
+import pprint
 from configparser import ConfigParser
 from urllib import request, parse
 from argparse import *
@@ -39,10 +40,15 @@ def constructRequest(city_name, isImperial=False, forecast=False):
     units = "imperial" if isImperial else "metric"
     apiRequest = API_ACCESS_LINK + "?q={}".format(cityNameUrl) + "&units={}".format(units) + "&appid={}".format(appId)
 
-    return apiRequest
     
 
-       
+def fetchWeather(req):  # return weather data based on the constructed API request URL
+
+    result = request.urlopen(req)
+    weatherInfo = result.read()
+    formatted = json.loads(weatherInfo)
+    return formatted
+
 
 
 
@@ -50,7 +56,9 @@ if __name__ == "__main__":
 
     args_passed = parse_args()
     print(args_passed.city, args_passed.imperial)
-    print(constructRequest(args_passed.city))
+    query = constructRequest(args_passed.city, args_passed.imperial)
+    weather_info = fetchWeather(query)
+    print(weather_info)
     
     
 
