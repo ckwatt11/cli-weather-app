@@ -1,7 +1,8 @@
 import json
 import pprint
+import sys
 from configparser import ConfigParser
-from urllib import request, parse
+from urllib import error, request, parse
 from argparse import *
 
 API_ACCESS_LINK = "http://api.openweathermap.org/data/2.5/weather" # appended content to link will be user input that will build the endpoint query. 
@@ -28,7 +29,7 @@ def parse_args():
     return argParser.parse_args()
 
 
-def constructRequest(city_name, isImperial=False, forecast=False):
+def constructRequest(city_name, isImperial=False, isForecast=False):
      
     """ 
     Combine the components back into a URL string, and to convert a “relative URL” to an absolute URL given a “base URL.”
@@ -39,15 +40,30 @@ def constructRequest(city_name, isImperial=False, forecast=False):
     cityNameUrl = parse.quote_plus(city) # how city names (should) appear in the URL : 'Sao Paulo' -> 'Sao+Paulo' 
     units = "imperial" if isImperial else "metric"
     apiRequest = API_ACCESS_LINK + "?q={}".format(cityNameUrl) + "&units={}".format(units) + "&appid={}".format(appId)
+    return apiRequest
 
     
 
 def fetchWeather(req):  # return weather data based on the constructed API request URL
 
-    result = request.urlopen(req)
+    # add error/exception handling for conciseness and readability
+    try:
+        result = request.urlopen(req) # create GET request
+    except error.HTTPError as http_err:
+        match http_err:
+            case int('401'):
+                sys.exit("Access not authorized. Please check your API key.")
+            case int('404'): 
+                sys.exit("No weather information available for the city: {}".format(args_passed.city))
+            case default:
+                sys.exit("You encountered an error: {}".format(http_err))    
+
     weatherInfo = result.read()
-    formatted = json.loads(weatherInfo)
-    return formatted
+    try:
+        return json.loads(weatherInfo)
+    except json.JSONDecodeError:
+        sys.exit("Couldn't read server response.\n")
+
 
 
 
@@ -56,9 +72,10 @@ if __name__ == "__main__":
 
     args_passed = parse_args()
     print(args_passed.city, args_passed.imperial)
-    query = constructRequest(args_passed.city, args_passed.imperial)
-    weather_info = fetchWeather(query)
-    print(weather_info)
+    cityWeather = fetchWeather(constructRequest(args_passed.city, args_passed.imperial))
+    print(cityWeather)
+    
+    
     
     
 
