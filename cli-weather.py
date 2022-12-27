@@ -1,6 +1,7 @@
 import json
 import pprint
 import sys
+from style import *
 from configparser import ConfigParser
 from urllib import error, request, parse
 from argparse import *
@@ -89,8 +90,10 @@ def displayWeather(weather_output_dict, isImperial=False):
     city_temp = weather_output_dict['main']['temp']
     weather_description = weather_output_dict['weather'][0]['description']
     temp_units = "°F" if isImperial else "°C"
+    change_color(REVERSE)
     print(f"\nPlace: {city_name.capitalize():^{OUTPUT_PADDING}}\n")
     print(f"Temperature: {city_temp} {temp_units}\n")
+    change_color(RESET)
     print(
     f"Weather Description: \t{weather_description.capitalize():^{OUTPUT_PADDING}}\n",
     end=" ",
@@ -129,20 +132,3 @@ if __name__ == "__main__":
         fcast_data = json.loads(forecast_info)
         for i in range(40):
             print(f"Period {i + 1} : {fcast_data['list'][i]['main']}\n")
-
-        
-
-
-
-
-    
-            
-    
-    
-
-    
-    
-    
-
-
-
