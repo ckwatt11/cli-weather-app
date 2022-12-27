@@ -9,6 +9,8 @@ API_ACCESS_LINK = "http://api.openweathermap.org/data/2.5/weather" # content app
 
 OUTPUT_PADDING = 20
 
+GEOCODING_API_LINK = "http://api.openweathermap.org/geo/1.0/direct"
+
 API_FORECAST_ACCESS_LINK = "http://api.openweathermap.org/data/2.5/forecast"
 
 # create getter for personal API key.
@@ -28,7 +30,6 @@ def parse_args():
 
     argParser = ArgumentParser(description= "Return weather (and optionally the forecast for the near future (~5 days)) for a city.")
     argParser.add_argument("city", nargs="+", type=str, help="entered city name must not contain spelling errors") # allows user to pass multiple whitespace-separated words as city names
-    argParser.add_argument("country code", default="", nargs="?", type=str, help="enter ISO-3166 country code for more specific results (in case of duplicate city names)")
     argParser.add_argument("-i", "--imperial", action="store_true", help="change display mode to Fahrenheit.")
     
     
@@ -44,8 +45,10 @@ def constructRequest(city_name, isImperial=False):
  
     city = " ".join(city_name)
     cityNameUrl = parse.quote_plus(city) # how city names (should) appear in the URL : 'Sao Paulo' -> 'Sao+Paulo' 
+    
     # forecast = 
     units = "imperial" if isImperial else "metric"
+    
     apiRequest = API_ACCESS_LINK + "?q={}".format(cityNameUrl) + "&units={}".format(units) + "&appid={}".format(appId)
     return apiRequest
 
@@ -84,10 +87,10 @@ def displayWeather(weather_output_dict, isImperial=False):
     city_temp = weather_output_dict['main']['temp']
     weather_description = weather_output_dict['weather'][0]['description']
     temp_units = "°F" if isImperial else "°C"
-    print(f"Place: {city_name:^{OUTPUT_PADDING}}\n")
-    print(f"Temperature: {city_temp} {temp_units}")
+    print(f"\nPlace: {city_name:^{OUTPUT_PADDING}}\n")
+    print(f"Temperature: {city_temp} {temp_units}\n")
     print(
-    f"\t{weather_description.capitalize():^{OUTPUT_PADDING}}",
+    f"Weather Description: \t{weather_description.capitalize():^{OUTPUT_PADDING}}\n",
     end=" ",
     )
 
@@ -98,6 +101,12 @@ if __name__ == "__main__":
 
     args_passed = parse_args()
     cityWeather = fetchWeather(constructRequest(args_passed.city, args_passed.imperial))
+    suggestions = GEOCODING_API_LINK + "?q={}".format(args_passed.city[0]) + "&limit=10" + "&appid={}".format(appId)
+    geocode_city_options = request.urlopen(suggestions)
+    possibilities = geocode_city_options.read()
+    possible_cities = json.loads(possibilities)
+    for i in range(len(possible_cities)):
+        print(f"{i} : \t {possible_cities[i]['name']}")
     displayWeather(cityWeather, args_passed.imperial)
 
     want_forecast = input("\n Would you like to see the 5-day forecast (in 3-hour periods ) for the city? (y/n) \n")
