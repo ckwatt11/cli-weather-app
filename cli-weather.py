@@ -7,6 +7,7 @@ from argparse import *
 
 API_ACCESS_LINK = "http://api.openweathermap.org/data/2.5/weather" # content appended to link will be user input that will build the endpoint query. 
 
+OUTPUT_PADDING = 20
 
 API_FORECAST_ACCESS_LINK = "http://api.openweathermap.org/data/2.5/forecast"
 
@@ -82,12 +83,12 @@ def displayWeather(weather_output_dict, isImperial=False):
     city_temp = weather_output_dict['main']['temp']
     weather_description = weather_output_dict['weather'][0]['description']
     temp_units = "°F" if isImperial else "°C"
-    print("Place: {}\n".format(city_name))
-    print("Temperature: {} {} \n".format(city_temp, temp_units))
-    print("Weather Description: {}".format(weather_description))
-
-
-    
+    print(f"Place: {city_name:^{OUTPUT_PADDING}}\n")
+    print(f"Temperature: {city_temp} {temp_units}")
+    print(
+    f"\t{weather_description.capitalize():^{OUTPUT_PADDING}}",
+    end=" ",
+    )
 
 
 
@@ -95,19 +96,20 @@ def displayWeather(weather_output_dict, isImperial=False):
 if __name__ == "__main__":
 
     args_passed = parse_args()
-    print(args_passed.city, args_passed.imperial)
     cityWeather = fetchWeather(constructRequest(args_passed.city, args_passed.imperial))
-    displayWeather(cityWeather)
+    displayWeather(cityWeather, args_passed.imperial)
 
-    want_forecast = input("\n Would you like to see the forecast for the city? (y/n) \n")
+    want_forecast = input("\n Would you like to see the 5-day/3-hour-step forecast for the city? (y/n) \n")
     if (want_forecast == "y" or want_forecast == "Y"):
         f_units = "imperial" if args_passed.imperial else "metric"
         city_forecast_request = API_FORECAST_ACCESS_LINK + "?lat={}".format(cityWeather['coord']['lat']) + "&lon={}".format(cityWeather['coord']['lon']) + "&appid={}".format(appId) + "&units={}".format(f_units)
         city_forecast = request.urlopen(city_forecast_request)
         forecast_info = city_forecast.read()
         fcast_data = json.loads(forecast_info)
-        pprint.pp(fcast_data['main'])
+        for i in range(40):
+            print(f"Period {i + 1} : {fcast_data['list'][i]['main']}\n")
         
+
 
 
 
