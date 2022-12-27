@@ -5,10 +5,10 @@ from configparser import ConfigParser
 from urllib import error, request, parse
 from argparse import *
 
-API_ACCESS_LINK = "http://api.openweathermap.org/data/2.5/weather" # appended content to link will be user input that will build the endpoint query. 
+API_ACCESS_LINK = "http://api.openweathermap.org/data/2.5/weather" # content appended to link will be user input that will build the endpoint query. 
 
-#  API_FORECAST_ACCESS_LINK = "api.openweathermap.org/data/2.5/forecast?lat={lat}&lon={lon}&appid={API key}"
 
+API_FORECAST_ACCESS_LINK = "http://api.openweathermap.org/data/2.5/forecast"
 
 # create getter for personal API key.
 
@@ -19,24 +19,27 @@ def getApiKey():
     return config["open-weather"]["api_key"]
 
 
+appId = getApiKey() 
+
 
 # create function for parsing args passed to CLI
 def parse_args():
 
-    argParser = ArgumentParser(description= "Return weather/forecast for the near future (~5 days) for a city.")
+    argParser = ArgumentParser(description= "Return weather (and optionally the forecast for the near future (~5 days)) for a city.")
     argParser.add_argument("city", nargs="+", type=str, help="entered city name must not contain spelling errors") # allows user to pass multiple whitespace-separated words as city names
     argParser.add_argument("-i", "--imperial", action="store_true", help="change display mode to Fahrenheit.")
+    
     #argParser.add_argument("-f", "--forecast", action="store_true", help="show 5 day/3 hour forecast for the city") 
     return argParser.parse_args()
 
 
-def constructRequest(city_name, country_code, isImperial=False, isForecast=False):
+def constructRequest(city_name, isImperial=False):
      
     """ 
     Combine the components back into a URL API request string, and to convert a “relative URL” to an absolute URL given a “base URL.”
 
     """
-    appId = getApiKey()
+ 
     city = " ".join(city_name)
     cityNameUrl = parse.quote_plus(city) # how city names (should) appear in the URL : 'Sao Paulo' -> 'Sao+Paulo' 
     # forecast = 
@@ -60,7 +63,7 @@ def fetchWeather(req):  # return weather data based on the constructed API reque
             case '401':
                 sys.exit("Access not authorized. Please check your API key.")
             case '404': 
-                sys.exit("No weather information available for the city: {}".format(args_passed.city))
+                sys.exit("No weather information available for this city. Please double-check the name you entered.")
             case default:
                 sys.exit("The app encountered an error: {}".format(http_err))    
 
@@ -73,6 +76,20 @@ def fetchWeather(req):  # return weather data based on the constructed API reque
 
 
 
+def displayWeather(weather_output_dict, isImperial=False):
+
+    city_name = weather_output_dict['name']
+    city_temp = weather_output_dict['main']['temp']
+    weather_description = weather_output_dict['weather'][0]['description']
+    temp_units = "°F" if isImperial else "°C"
+    print("Place: {}\n".format(city_name))
+    print("Temperature: {} {} \n".format(city_temp, temp_units))
+    print("Weather Description: {}".format(weather_description))
+
+
+    
+
+
 
 
 if __name__ == "__main__":
@@ -80,8 +97,25 @@ if __name__ == "__main__":
     args_passed = parse_args()
     print(args_passed.city, args_passed.imperial)
     cityWeather = fetchWeather(constructRequest(args_passed.city, args_passed.imperial))
-    pprint.pp(cityWeather)
+    displayWeather(cityWeather)
+
+    want_forecast = input("\n Would you like to see the forecast for the city? (y/n) \n")
+    if (want_forecast == "y" or want_forecast == "Y"):
+        f_units = "imperial" if args_passed.imperial else "metric"
+        city_forecast_request = API_FORECAST_ACCESS_LINK + "?lat={}".format(cityWeather['coord']['lat']) + "&lon={}".format(cityWeather['coord']['lon']) + "&appid={}".format(appId) + "&units={}".format(f_units)
+        city_forecast = request.urlopen(city_forecast_request)
+        forecast_info = city_forecast.read()
+        fcast_data = json.loads(forecast_info)
+        pprint.pp(fcast_data['main'])
+        
+
+
+
     
+            
+    
+    
+# "http://api.openweathermap.org/data/2.5/forecast?lat=48.2085&lon=16.3721&appid=af0347ca0fb19b53bc5d96810923ed92&units=metric"
     
     
     
