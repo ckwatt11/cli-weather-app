@@ -28,9 +28,10 @@ def parse_args():
 
     argParser = ArgumentParser(description= "Return weather (and optionally the forecast for the near future (~5 days)) for a city.")
     argParser.add_argument("city", nargs="+", type=str, help="entered city name must not contain spelling errors") # allows user to pass multiple whitespace-separated words as city names
+    argParser.add_argument("country code", default="", nargs="?", type=str, help="enter ISO-3166 country code for more specific results (in case of duplicate city names)")
     argParser.add_argument("-i", "--imperial", action="store_true", help="change display mode to Fahrenheit.")
     
-    #argParser.add_argument("-f", "--forecast", action="store_true", help="show 5 day/3 hour forecast for the city") 
+    
     return argParser.parse_args()
 
 
@@ -99,7 +100,7 @@ if __name__ == "__main__":
     cityWeather = fetchWeather(constructRequest(args_passed.city, args_passed.imperial))
     displayWeather(cityWeather, args_passed.imperial)
 
-    want_forecast = input("\n Would you like to see the 5-day/3-hour-step forecast for the city? (y/n) \n")
+    want_forecast = input("\n Would you like to see the 5-day forecast (in 3-hour periods ) for the city? (y/n) \n")
     if (want_forecast == "y" or want_forecast == "Y"):
         f_units = "imperial" if args_passed.imperial else "metric"
         city_forecast_request = API_FORECAST_ACCESS_LINK + "?lat={}".format(cityWeather['coord']['lat']) + "&lon={}".format(cityWeather['coord']['lon']) + "&appid={}".format(appId) + "&units={}".format(f_units)
@@ -108,6 +109,7 @@ if __name__ == "__main__":
         fcast_data = json.loads(forecast_info)
         for i in range(40):
             print(f"Period {i + 1} : {fcast_data['list'][i]['main']}\n")
+
         
 
 
@@ -117,7 +119,7 @@ if __name__ == "__main__":
             
     
     
-# "http://api.openweathermap.org/data/2.5/forecast?lat=48.2085&lon=16.3721&appid=af0347ca0fb19b53bc5d96810923ed92&units=metric"
+
     
     
     
