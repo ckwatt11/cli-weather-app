@@ -54,7 +54,7 @@ def constructRequest(city_name, country_code="", isImperial=False):
     Combine the components back into a URL API request string, and to convert a “relative URL” to an absolute URL given a “base URL.”
 
     """
-
+    
     cityNameUrl = parse.quote_plus(city_name) # how city names (should) appear in the URL : 'Sao Paulo' -> 'Sao+Paulo' 
     
     # forecast = 
@@ -154,7 +154,7 @@ def formatCityName(full_city_name, cty):
     """
     Formats official city titles into valid search query names. Eg. "Town of Dresden, US (does not return expected output) -> Dresden, US (does)
     """
-    string_size = len(cty)
+    string_size = len(full_city_name)
     start_idx = full_city_name.find(cty)
     return full_city_name[start_idx:start_idx + string_size]
 
@@ -176,7 +176,7 @@ if __name__ == "__main__":
     chosen_city = possible_cities[choice]['name']
     final_choice = formatCityName(chosen_city, args_passed.city[0])
     country = possible_cities[choice]['country']
-    print("You chose: {}, {}".format(chosen_city, possible_cities[choice]['country']))    
+    print("You chose: {}, {}".format(final_choice, possible_cities[choice]['country']))    
     cityWeather = fetchWeather(constructRequest(final_choice, country, args_passed.imperial))
 
 

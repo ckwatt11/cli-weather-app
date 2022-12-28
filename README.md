@@ -1,3 +1,3 @@
 # cli-weather-app
 
-This is a weather app that can be exexuted from the command line interface(CLI). 
+This is a weather app that can be executed from the command line interface(CLI). Additionally, it may (optionally) fetch the 5-day forecast for the chosen city (in 3-hour periods). The app makes use of various free-to-use REST APIs provided by OpenWeather. The Geocoding API helps the user streamline their search by returning a list of all cities with duplicate names. The weather output has been styeld using python libraries and emojis for increased visual appeal and readability. 
