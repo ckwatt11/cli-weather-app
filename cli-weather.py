@@ -101,43 +101,59 @@ def displayWeather(weather_output_dict, isImperial=False):
     temp_units = "°F" if isImperial else "°C"
     change_color(REVERSE)
     print(f"\nPlace: {city_name.capitalize():^{OUTPUT_PADDING}}\n")
+    weather_icon, clr = _set_disp_params(weather_id)
+    change_color(clr)
     print(f"Temperature: {city_temp} {temp_units}\n")
+    print(f"")
     print(
-    f"Weather Description: \t{weather_description.capitalize():^{OUTPUT_PADDING}}\n",
+    f"Weather Description: \t{weather_description.capitalize():^{OUTPUT_PADDING}}",
     end=" ",
     )
+    print(f" {weather_icon}", end="")
     change_color(RESET)
 
 
 def _set_disp_params(wthr_id): # not a public function
 
     if wthr_id in THUNDERSTORM:
-        color = RED
+
+        display_params = ("💥", RED)
 
     elif wthr_id in DRIZZLE:
-        color = CYAN
+
+        display_params = ("💧", CYAN)
 
     elif wthr_id in RAIN:
-        color = BLUE
+
+        display_params = ("💦", BLUE)
 
     elif wthr_id in SNOW:
-        color = WHITE
+
+        display_params = ("⛄️", WHITE)
 
     elif wthr_id in ATMOSPHERE:
-        color = BLUE
+
+        display_params = ("🌀", BLUE)
 
     elif wthr_id in CLEAR:
-        color = YELLOW
+
+        display_params = ("🔆", YELLOW)
 
     elif wthr_id in CLOUDY:
-        color = WHITE
-        
-    else: 
-        color = RESET
 
-    return color;     
+        display_params = ("💨", WHITE)
 
-def formatCityName(full_city_name, cty):
+    else:  # In case the API adds new weather codes
+
+        display_params = ("🌈", RESET)
+
+    return display_params
+    
+
+def formatCityName(full_city_name, cty): 
+    """
+    Formats official city titles into valid search query names. Eg. "Town of Dresden, US (does not return expected output) -> Dresden, US (does)
+    """
     string_size = len(cty)
     start_idx = full_city_name.find(cty)
     return full_city_name[start_idx:start_idx + string_size]
@@ -175,3 +191,4 @@ if __name__ == "__main__":
         fcast_data = json.loads(forecast_info)
         for i in range(40):
             print(f"Period {i + 1} : {fcast_data['list'][i]['main']}\n")
+           
