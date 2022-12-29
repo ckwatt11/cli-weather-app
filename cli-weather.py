@@ -44,11 +44,11 @@ def parse_args():
     argParser = ArgumentParser(description= "Return weather (and optionally the forecast for the near future (~5 days)) for a city.")
     argParser.add_argument("city", nargs="+", type=str, help="entered city name must not contain spelling errors") # allows user to pass multiple whitespace-separated words as city names
     argParser.add_argument("-i", "--imperial", action="store_true", help="change display mode to Fahrenheit.")
-    
+    argParser.add_argument("-l", "--language", nargs=1, type=str, help="view requested data in specified target language")
     return argParser.parse_args()
 
 
-def constructRequest(city_name, country_code="", isImperial=False):
+def constructRequest(city_name, country_code="", lang="en", isImperial=False):
      
     """ 
     Combine the components back into a URL API request string, and to convert a “relative URL” to an absolute URL given a “base URL.”
@@ -60,7 +60,7 @@ def constructRequest(city_name, country_code="", isImperial=False):
     # forecast = 
     units = "imperial" if isImperial else "metric"
     
-    apiRequest = API_ACCESS_LINK + "?q={}".format(cityNameUrl) + ",{}".format(country_code) + "&units={}".format(units) + "&appid={}".format(appId)
+    apiRequest = API_ACCESS_LINK + "?q={}".format(cityNameUrl) + ",{}".format(country_code) + "&units={}".format(units) + "&appid={}".format(appId) + "&lang={}".format(lang)
     return apiRequest
 
     
@@ -100,17 +100,20 @@ def displayWeather(weather_output_dict, isImperial=False):
     weather_id = weather_output_dict['weather'][0]['id']
     temp_units = "°F" if isImperial else "°C"
     change_color(REVERSE)
+    
     print(f"\nPlace: {city_name.capitalize():^{OUTPUT_PADDING}}\n")
+    
+    print(f"Temperature: {city_temp} {temp_units}\n")
+    
     weather_icon, clr = _set_disp_params(weather_id)
     change_color(clr)
-    print(f"Temperature: {city_temp} {temp_units}\n")
-    print(f"")
     print(
     f"Weather Description: \t{weather_description.capitalize():^{OUTPUT_PADDING}}",
     end=" ",
     )
     print(f" {weather_icon}", end="")
     change_color(RESET)
+   
 
 
 def _set_disp_params(wthr_id): # not a public function
@@ -154,7 +157,7 @@ def formatCityName(full_city_name, cty):
     """
     Formats official city titles into valid search query names. Eg. "Town of Dresden, US (does not return expected output) -> Dresden, US (does)
     """
-    string_size = len(full_city_name)
+    string_size = len(cty)
     start_idx = full_city_name.find(cty)
     return full_city_name[start_idx:start_idx + string_size]
 
@@ -162,22 +165,28 @@ def formatCityName(full_city_name, cty):
 if __name__ == "__main__":
 
     args_passed = parse_args()
-    suggestions = GEOCODING_API_LINK + "?q={}".format(args_passed.city[0]) + "&limit=10" + "&appid={}".format(appId)
+    suggestions = GEOCODING_API_LINK + "?q={}".format(parse.quote_plus(" ".join(args_passed.city))) + "&limit=10" + "&appid={}".format(appId) + "&lang={}".format(args_passed.language[0])
     geocode_city_options = request.urlopen(suggestions)
     possibilities = geocode_city_options.read()
     possible_cities = json.loads(possibilities)
+    chosen_lang = args_passed.language[0]
     
     for i in range(len(possible_cities)):
         print(f"{i} :\t{possible_cities[i]['name']}, {possible_cities[i]['country']}")
     
 
     
-    choice = int(input("Please be more specific (choose a number to validate intended city) : \n").strip())
+    choice = int(input("Please be more specific (choose a number to validate intended city) : \n"))
     chosen_city = possible_cities[choice]['name']
-    final_choice = formatCityName(chosen_city, args_passed.city[0])
+    try:
+        other_name = possible_cities[choice]['local_names'][chosen_lang]
+    except KeyError:
+        print("This language does not have a (known) unique name for this city; switching to English name. \n")
+        other_name = chosen_city    
+    
     country = possible_cities[choice]['country']
-    print("You chose: {}, {}".format(final_choice, possible_cities[choice]['country']))    
-    cityWeather = fetchWeather(constructRequest(final_choice, country, args_passed.imperial))
+    print("You chose: {}, {}".format(other_name, possible_cities[choice]['country']))    
+    cityWeather = fetchWeather(constructRequest(chosen_city, country, chosen_lang, args_passed.imperial))
 
 
     displayWeather(cityWeather, args_passed.imperial)
