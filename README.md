@@ -54,6 +54,6 @@ Please use the following codes corresponding to possible target languages:
     zh_tw - Chinese Traditional
     zu - Zulu
 
-It is important to note that not all cities have different names in different languages.
+It is important to note that not all cities have different names in different languages, and certain cities do not have weather data available (in which case, the app returns a 404 error).
 
 

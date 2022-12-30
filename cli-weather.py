@@ -44,7 +44,7 @@ def parse_args():
     argParser = ArgumentParser(description= "Return weather (and optionally the forecast for the near future (~5 days)) for a city.")
     argParser.add_argument("city", nargs="+", type=str, help="entered city name must not contain spelling errors") # allows user to pass multiple whitespace-separated words as city names
     argParser.add_argument("-i", "--imperial", action="store_true", help="change display mode to Fahrenheit.")
-    argParser.add_argument("-l", "--language", nargs=1, type=str, help="view requested data in specified target language")
+    argParser.add_argument("-l", "--language", nargs=1, type=str, default="en", help="view requested data in specified target language")
     return argParser.parse_args()
 
 
@@ -55,7 +55,7 @@ def constructRequest(city_name, country_code="", lang="en", isImperial=False):
 
     """
     
-    cityNameUrl = parse.quote_plus(city_name) # how city names (should) appear in the URL : 'Sao Paulo' -> 'Sao+Paulo' 
+    cityNameUrl = parse.quote_plus(str(city_name)) # how city names (should) appear in the URL : 'Sao Paulo' -> 'Sao+Paulo' 
     
     # forecast = 
     units = "imperial" if isImperial else "metric"
@@ -159,12 +159,13 @@ def formatCityName(full_city_name, cty):
     """
     string_size = len(cty)
     start_idx = full_city_name.find(cty)
-    return full_city_name[start_idx:start_idx + string_size]
+    print(full_city_name[start_idx:start_idx + string_size])
 
 
 if __name__ == "__main__":
 
     args_passed = parse_args()
+    entered_city_name = args_passed.city
     suggestions = GEOCODING_API_LINK + "?q={}".format(parse.quote_plus(" ".join(args_passed.city))) + "&limit=10" + "&appid={}".format(appId) + "&lang={}".format(args_passed.language[0])
     geocode_city_options = request.urlopen(suggestions)
     possibilities = geocode_city_options.read()
@@ -178,17 +179,19 @@ if __name__ == "__main__":
     
     choice = int(input("Please be more specific (choose a number to validate intended city) : \n"))
     chosen_city = possible_cities[choice]['name']
+    
+    
     try:
         other_name = possible_cities[choice]['local_names'][chosen_lang]
     except KeyError:
         print("This language does not have a (known) unique name for this city; switching to English name. \n")
-        other_name = chosen_city    
+        other_name = entered_city_name[0] if (len(entered_city_name) == 1) else " ".join(entered_city_name)
     
     country = possible_cities[choice]['country']
+    
     print("You chose: {}, {}".format(other_name, possible_cities[choice]['country']))    
-    cityWeather = fetchWeather(constructRequest(chosen_city, country, chosen_lang, args_passed.imperial))
-
-
+    cityWeather = fetchWeather(constructRequest(other_name, country, chosen_lang, args_passed.imperial))
+    
     displayWeather(cityWeather, args_passed.imperial)
 
     want_forecast = input("\n Would you like to see the 5-day forecast (in 3-hour periods ) for the city? (y/n) \n")
@@ -199,5 +202,6 @@ if __name__ == "__main__":
         forecast_info = city_forecast.read()
         fcast_data = json.loads(forecast_info)
         for i in range(40):
-            print(f"Period {i + 1} : {fcast_data['list'][i]['main']}\n")
+            print(f"Period {i + 1} : \n temp: {fcast_data['list'][i]['main']['temp']} \n Feels like: {fcast_data['list'][i]['main']['feels_like']} \n Min: {fcast_data['list'][i]['main']['temp_min']} \n Max: {fcast_data['list'][i]['main']['temp_max']} \n Pressure: {fcast_data['list'][i]['main']['pressure']} \n Sea Level: {fcast_data['list'][i]['main']['sea_level']} \n Ground Level: {fcast_data['list'][i]['main']['grnd_level']} \n Humidity: {fcast_data['list'][i]['main']['humidity']} \n")
+            
            
