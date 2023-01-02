@@ -190,8 +190,8 @@ if __name__ == "__main__":
     
     country = possible_cities[choice]['country']
     
-    print("You chose: {}, {}".format(other_name, country))    
-    cityWeather = fetchWeather(constructRequest(other_name, country, chosen_lang, args_passed.imperial))
+    print("You chose: {}, {}".format(chosen_city, country))    
+    cityWeather = fetchWeather(constructRequest(chosen_city, country, chosen_lang, args_passed.imperial))
     
     displayWeather(cityWeather, args_passed.imperial)
 
