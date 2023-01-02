@@ -67,7 +67,7 @@ It is important to note that not all cities have different names in different la
 ![basicmetric](https://user-images.githubusercontent.com/29700463/210189478-b42e8c5b-6711-45f2-80a2-b10df1097215.PNG)
 
 
-***Sample output in Imperial units: ***
+***Sample output in Imperial units:***
 
 ![basicimperial](https://user-images.githubusercontent.com/29700463/210189502-f808fd87-98fd-4761-8a65-f0572849572a.PNG)
 
@@ -77,7 +77,7 @@ It is important to note that not all cities have different names in different la
 ![ukrainianoutput](https://user-images.githubusercontent.com/29700463/210189521-dcccabf9-0d86-4429-b544-3e3f19ba8ba6.PNG)
 
 
-***Sample forecast output: ***
+***Sample forecast output:***
 
 ![forecastimp](https://user-images.githubusercontent.com/29700463/210189657-58d96567-1c35-4b01-828c-cbca5bf2d1e5.PNG)
 
