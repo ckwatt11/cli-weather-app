@@ -6,6 +6,7 @@ from configparser import ConfigParser
 from urllib import error, request, parse
 from argparse import *
 
+
 OUTPUT_PADDING = 20
 
 API_ACCESS_LINK = "http://api.openweathermap.org/data/2.5/weather" # content appended to link will be user input that will build the endpoint query. 
@@ -189,7 +190,7 @@ if __name__ == "__main__":
     
     country = possible_cities[choice]['country']
     
-    print("You chose: {}, {}".format(other_name, possible_cities[choice]['country']))    
+    print("You chose: {}, {}".format(other_name, country))    
     cityWeather = fetchWeather(constructRequest(other_name, country, chosen_lang, args_passed.imperial))
     
     displayWeather(cityWeather, args_passed.imperial)
@@ -197,11 +198,10 @@ if __name__ == "__main__":
     want_forecast = input("\n Would you like to see the 5-day forecast (in 3-hour periods ) for the city? (y/n) \n")
     if (want_forecast == "y" or want_forecast == "Y"):
         f_units = "imperial" if args_passed.imperial else "metric"
-        city_forecast_request = API_FORECAST_ACCESS_LINK + "?lat={}".format(cityWeather['coord']['lat']) + "&lon={}".format(cityWeather['coord']['lon']) + "&appid={}".format(appId) + "&units={}".format(f_units)
+        city_forecast_request = API_FORECAST_ACCESS_LINK + "?lat={}".format(cityWeather['coord']['lat']) + "&lon={}".format(cityWeather['coord']['lon']) + "&appid={}".format(appId) + "&units={}".format(f_units) + "&lang={}".format(chosen_lang)
         city_forecast = request.urlopen(city_forecast_request)
         forecast_info = city_forecast.read()
         fcast_data = json.loads(forecast_info)
         for i in range(40):
             print(f"Period {i + 1} : \n temp: {fcast_data['list'][i]['main']['temp']} \n Feels like: {fcast_data['list'][i]['main']['feels_like']} \n Min: {fcast_data['list'][i]['main']['temp_min']} \n Max: {fcast_data['list'][i]['main']['temp_max']} \n Pressure: {fcast_data['list'][i]['main']['pressure']} \n Sea Level: {fcast_data['list'][i]['main']['sea_level']} \n Ground Level: {fcast_data['list'][i]['main']['grnd_level']} \n Humidity: {fcast_data['list'][i]['main']['humidity']} \n")
             
-           
