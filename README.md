@@ -57,3 +57,27 @@ Please use the following codes corresponding to possible target languages:
 It is important to note that not all cities have different names in different languages, and certain cities do not have weather data available (in which case, the app returns a 404 error).
 
 
+***Help page for the app:***
+
+![helpfile](https://user-images.githubusercontent.com/29700463/210189454-8edef1a8-466b-45ef-8b6f-d0d401d464ec.PNG)
+
+
+***Sample output in metric units:*** 
+
+![basicmetric](https://user-images.githubusercontent.com/29700463/210189478-b42e8c5b-6711-45f2-80a2-b10df1097215.PNG)
+
+
+***Sample output in Imperial units: ***
+
+![basicimperial](https://user-images.githubusercontent.com/29700463/210189502-f808fd87-98fd-4761-8a65-f0572849572a.PNG)
+
+
+***Sample output in Ukrainian:***
+
+![ukrainianoutput](https://user-images.githubusercontent.com/29700463/210189521-dcccabf9-0d86-4429-b544-3e3f19ba8ba6.PNG)
+
+
+***Sample forecast output: ***
+
+![forecastimp](https://user-images.githubusercontent.com/29700463/210189657-58d96567-1c35-4b01-828c-cbca5bf2d1e5.PNG)
+
